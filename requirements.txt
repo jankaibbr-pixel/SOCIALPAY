@@ -1,0 +1,4 @@
+flask==3.1.0
+gunicorn==23.0.0
+# werkzeug is a Flask dependency — already installed, no extra pip install needed.
+# All SECURITY UPGRADE features (password hashing, etc.) use werkzeug.security only.
