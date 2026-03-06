@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}" dir="{{ 'rtl' if lang == 'ar' else 'ltr' }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0A2463">
+  <title>Verify OTP - SocialPay</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="auth-page">
+  <div class="auth-hero">
+    <div class="auth-logo">Social<span>Pay</span></div>
+    <div style="font-size:52px;margin:16px 0">📧</div>
+    <div style="font-size:18px;font-weight:800;color:white">Enter Reset OTP</div>
+    <div class="auth-tagline" style="margin-top:8px">We sent a 6-digit code to your email.</div>
+  </div>
+
+  <div class="auth-card">
+    <!-- OTP digit boxes (reuses existing CSS + JS from app.js) -->
+    <div class="otp-boxes">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+      <input class="otp-input" type="text" inputmode="numeric" maxlength="1">
+    </div>
+    <input type="hidden" id="otp-hidden">
+
+    <button class="btn btn-primary" id="otp-form-btn" onclick="doVerify()">
+      ✅ Verify Code
+    </button>
+
+    <!-- Resend button with 60-second cooldown -->
+    <div style="text-align:center;margin-top:20px">
+      <button id="resend-btn" data-label="Resend OTP"
+        class="btn btn-outline" onclick="doResend(this)" style="width:auto;padding:10px 24px">
+        🔄 Resend OTP
+      </button>
+    </div>
+
+    <p style="text-align:center;margin-top:20px;font-size:13px;color:var(--muted)">
+      <a href="/forgot_password" style="color:var(--accent);font-weight:700">← Back</a>
+    </p>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="/static/js/app.js"></script>
+<script>
+async function doVerify() {
+  const otp = document.getElementById('otp-hidden').value;
+  if (otp.length < 6) { showToast('{{ t("otp_invalid") }}', 'warning'); return; }
+  const fd = new FormData();
+  fd.append('otp', otp);
+  await postForm('/forgot_verify_otp', fd, document.getElementById('otp-form-btn'));
+}
+
+async function doResend(btn) {
+  const fd = new FormData();
+  const res = await postForm('/resend_forgot_otp', fd, btn);
+  if (res?.success) startResendTimer('resend-btn', 60);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  startResendTimer('resend-btn', 60);
+  document.querySelectorAll('.otp-input')[0]?.focus();
+});
+</script>
+</body>
+</html>
